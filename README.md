@@ -57,3 +57,17 @@ This will regenerate the synthetic dataset and all analysis outputs.
 ### BMI Spline Analysis
 
 ![BMI spline](output/figure_bmi_spline.png)
+
+## Reproducibility
+
+The complete workflow can be reproduced by running:
+
+```r
+source("run_all.R")
+```
+
+R session information is saved to `output/session_info.txt`.
+
+## Data Privacy
+
+All data in this repository are synthetic. No real participant, patient, hospital, or unpublished research-project data are included.
