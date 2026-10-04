@@ -44,3 +44,13 @@ source("run_all.R")
 4. Evaluate effect modification and nonlinear associations
 5. Conduct subgroup and sensitivity analyses
 6. Generate publication-style figures
+
+## Example Outputs
+
+### Modified Poisson Regression
+
+![Forest plot](output/figure_forest_plot.png)
+
+### BMI Spline Analysis
+
+![BMI spline](output/figure_bmi_spline.png)
