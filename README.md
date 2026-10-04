@@ -35,3 +35,12 @@ Run the complete analysis workflow from the project root:
 
 ```r
 source("run_all.R")
+
+## Workflow
+
+1. Generate a synthetic epidemiologic dataset
+2. Produce descriptive statistics and Table 1
+3. Fit multivariable linear, logistic, and modified Poisson regression models
+4. Evaluate effect modification and nonlinear associations
+5. Conduct subgroup and sensitivity analyses
+6. Generate publication-style figures
