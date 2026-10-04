@@ -35,6 +35,9 @@ Run the complete analysis workflow from the project root:
 
 ```r
 source("run_all.R")
+```
+
+This will regenerate the synthetic dataset and all analysis outputs.
 
 ## Workflow
 
