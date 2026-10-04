@@ -28,3 +28,10 @@ All data in this repository are synthetic and contain no real participant or pat
 ## Software
 
 R
+
+## Quick Start
+
+Run the complete analysis workflow from the project root:
+
+```r
+source("run_all.R")
