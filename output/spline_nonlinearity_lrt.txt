@@ -1,0 +1,9 @@
+Analysis of Deviance Table
+
+Model 1: health_outcome_binary ~ bmi + age + sex + smoking + physical_activity + 
+    short_sleep + hypertension
+Model 2: health_outcome_binary ~ splines::ns(bmi, df = 4) + age + sex + 
+    smoking + physical_activity + short_sleep + hypertension
+  Resid. Df Resid. Dev Df Deviance Pr(>Chi)
+1       792     463.39                     
+2       789     457.59  3   5.8041   0.1215
