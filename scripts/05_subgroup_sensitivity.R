@@ -6,7 +6,8 @@ primary_formula <- health_outcome_binary ~
 primary <- modified_poisson(primary_formula, dat)
 
 dat$short_sleep_alt <- as.integer(dat$sleep_duration <= 6)
-alternative_formula <- health_outcome_binary ~\n  age + sex + bmi + smoking + physical_activity + short_sleep_alt + hypertension
+alternative_formula <- health_outcome_binary ~
+  age + sex + bmi + smoking + physical_activity + short_sleep_alt + hypertension
 alternative <- modified_poisson(alternative_formula, dat)
 
 restricted <- subset(dat, bmi >= 18.5 & bmi <= 35)
