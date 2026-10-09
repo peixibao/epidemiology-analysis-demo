@@ -1,0 +1,65 @@
+name: R analysis checks
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  reproduce:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install R
+        uses: r-lib/actions/setup-r@v2
+        with:
+          r-version: 'release'
+          use-public-rspm: true
+
+      - name: Install dependencies
+        run: Rscript -e 'install.packages(c("sandwich", "ggplot2"))'
+
+      - name: Preserve committed reference outputs
+        run: |
+          mkdir -p /tmp/epidemiology-reference
+          cp data/synthetic_epidemiology_data.csv /tmp/epidemiology-reference/
+          cp output/*.csv /tmp/epidemiology-reference/
+
+      - name: Reproduce full pipeline
+        run: Rscript -e 'source("run_all.R")'
+
+      - name: Check reproducibility and output integrity
+        run: |
+          Rscript - <<'RSCRIPT'
+          input <- read.csv("data/synthetic_epidemiology_data.csv")
+          stopifnot(nrow(input) == 800L, ncol(input) == 12L,
+                    !anyDuplicated(input$id),
+                    all(input$health_outcome %in% c("Yes", "No")))
+          paths <- c(
+            "data/synthetic_epidemiology_data.csv",
+            list.files("output", pattern = "[.]csv$", full.names = TRUE)
+          )
+          for (path in paths) {
+            before <- read.csv(
+              file.path("/tmp/epidemiology-reference", basename(path)),
+              check.names = FALSE
+            )
+            after <- read.csv(path, check.names = FALSE)
+            if (!isTRUE(all.equal(before, after, tolerance = 1e-7))) {
+              stop("Generated output differs from committed reference: ", path)
+            }
+          }
+          for (path in c("output/figure_forest_plot.png",
+                         "output/figure_bmi_spline.png",
+                         "output/session_info.txt")) {
+            stopifnot(file.exists(path), file.info(path)$size > 0)
+          }
+          cat("Reproducibility checks passed for", length(paths),
+              "tracked CSV files.\n")
+          RSCRIPT

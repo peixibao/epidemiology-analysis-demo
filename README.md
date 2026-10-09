@@ -66,7 +66,7 @@ The complete workflow can be reproduced by running:
 source("run_all.R")
 ```
 
-R session information is saved to `output/session_info.txt`.
+R session information is saved to `output/session_info.txt`. The [GitHub Actions check](.github/workflows/r-check.yml) reruns the pipeline and validates the generated dataset and tables.
 
 ## Data Privacy
 

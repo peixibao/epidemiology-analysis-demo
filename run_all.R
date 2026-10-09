@@ -1,51 +1,40 @@
-# ============================================================
-# run_all.R
-#
-# Run the complete reproducible epidemiology workflow.
-# ============================================================
+# Reproduce the complete synthetic epidemiology analysis.
+source_path <- sys.frame(1)$ofile
+if (is.null(source_path) || !nzchar(source_path)) {
+  stop("Start the workflow with source('run_all.R').", call. = FALSE)
+}
+project_root <- dirname(normalizePath(source_path, mustWork = TRUE))
 
+run_pipeline <- function(root) {
+  previous_wd <- setwd(root)
+  on.exit(setwd(previous_wd), add = TRUE)
 
-# 01. Generate synthetic epidemiologic data
-source("scripts/01_generate_synthetic_data.R")
+  scripts <- c(
+    "scripts/00_check_packages.R",
+    "scripts/00_analysis_helpers.R",
+    "scripts/01_generate_synthetic_data.R",
+    "scripts/02_descriptive_analysis.R",
+    "scripts/03_regression_models.R",
+    "scripts/04_interaction_rcs.R",
+    "scripts/05_subgroup_sensitivity.R",
+    "scripts/06_figures.R"
+  )
+  absent <- scripts[!file.exists(scripts)]
+  if (length(absent)) {
+    stop("Missing workflow files: ", paste(absent, collapse = ", "), call. = FALSE)
+  }
+  dir.create("data", showWarnings = FALSE, recursive = TRUE)
+  dir.create("output", showWarnings = FALSE, recursive = TRUE)
 
+  for (script in scripts) {
+    message("\n--- ", script, " ---")
+    source(script, local = TRUE, echo = FALSE)
+  }
 
-# 02. Produce descriptive statistics and Table 1
-source("scripts/02_descriptive_analysis.R")
-
-
-# 03. Fit multivariable regression models
-source("scripts/03_regression_models.R")
-
-
-# 04. Conduct interaction and spline analyses
-source("scripts/04_interaction_rcs.R")
-
-
-# 05. Conduct subgroup and sensitivity analyses
-source("scripts/05_subgroup_sensitivity.R")
-
-
-# 06. Generate publication-style figures
-source("scripts/06_figures.R")
-
-
-# ------------------------------------------------------------
-# Save R session information for reproducibility
-# ------------------------------------------------------------
-
-if (!dir.exists("output")) {
-  dir.create("output")
+  writeLines(capture.output(sessionInfo()), "output/session_info.txt")
+  message("\nComplete epidemiology workflow finished successfully.")
+  invisible(TRUE)
 }
 
-capture.output(
-  sessionInfo(),
-  file = "output/session_info.txt"
-)
-
-
-cat(
-  "\n============================================\n",
-  "Complete analysis workflow finished successfully.\n",
-  "All generated tables and figures are available in output/.\n",
-  "============================================\n"
-)
+run_pipeline(project_root)
+rm(run_pipeline, project_root, source_path)
