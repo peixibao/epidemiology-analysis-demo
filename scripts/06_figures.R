@@ -1,126 +1,36 @@
-# ============================================================
-# 06_figures.R
-#
-# Purpose:
-# Generate publication-style figures from model outputs.
-# ============================================================
+# Reproducible plots from the saved model outputs.
+poisson <- read.csv("output/modified_poisson_results.csv")
+spline <- read.csv("output/bmi_spline_predictions.csv")
+forest <- subset(poisson, Term != "(Intercept)")
+forest$Term <- factor(forest$Term, levels = rev(forest$Term))
 
-
-# ------------------------------------------------------------
-# 1. Install/load ggplot2
-# ------------------------------------------------------------
-
-if (!requireNamespace("ggplot2", quietly = TRUE)) {
-  install.packages("ggplot2")
-}
-
-library(ggplot2)
-
-
-# ------------------------------------------------------------
-# 2. Forest plot for modified Poisson model
-# ------------------------------------------------------------
-
-poisson_results <- read.csv(
-  "output/modified_poisson_results.csv"
-)
-
-forest_data <- subset(
-  poisson_results,
-  Term != "(Intercept)"
-)
-
-forest_data$Term <- factor(
-  forest_data$Term,
-  levels = rev(forest_data$Term)
-)
-
-forest_plot <- ggplot(
-  forest_data,
-  aes(
-    x = RR,
-    y = Term
-  )
-) +
-  geom_point(
-    size = 2.5
+p_forest <- ggplot2::ggplot(forest, ggplot2::aes(x = RR, y = Term)) +
+  ggplot2::geom_point(size = 2.5) +
+  ggplot2::geom_errorbarh(
+    ggplot2::aes(xmin = Lower_95CI, xmax = Upper_95CI), height = .2
   ) +
-  geom_errorbarh(
-    aes(
-      xmin = Lower_95CI,
-      xmax = Upper_95CI
-    ),
-    height = 0.2
-  ) +
-  geom_vline(
-    xintercept = 1,
-    linetype = "dashed"
-  ) +
-  labs(
-    x = "Adjusted risk ratio (95% CI)",
-    y = NULL,
+  ggplot2::geom_vline(xintercept = 1, linetype = "dashed") +
+  ggplot2::labs(
+    x = "Adjusted prevalence ratio (95% CI)", y = NULL,
     title = "Multivariable Modified Poisson Regression"
   ) +
-  theme_minimal(
-    base_size = 12
-  )
+  ggplot2::theme_minimal(base_size = 12)
 
-print(forest_plot)
-
-ggsave(
-  filename = "output/figure_forest_plot.png",
-  plot = forest_plot,
-  width = 7,
-  height = 5,
-  dpi = 300
-)
-
-
-# ------------------------------------------------------------
-# 3. BMI spline figure
-# ------------------------------------------------------------
-
-spline_data <- read.csv(
-  "output/bmi_spline_predictions.csv"
-)
-
-spline_plot <- ggplot(
-  spline_data,
-  aes(
-    x = bmi,
-    y = Predicted_probability
-  )
+p_spline <- ggplot2::ggplot(
+  spline, ggplot2::aes(x = bmi, y = Predicted_probability)
 ) +
-  geom_ribbon(
-    aes(
-      ymin = Lower_95CI,
-      ymax = Upper_95CI
-    ),
-    alpha = 0.2
-  ) +
-  geom_line(
-    linewidth = 1
-  ) +
-  labs(
-    x = "BMI (kg/m²)",
-    y = "Predicted probability",
+  ggplot2::geom_ribbon(ggplot2::aes(
+    ymin = Lower_95CI, ymax = Upper_95CI
+  ), alpha = .2) +
+  ggplot2::geom_line(linewidth = 1) +
+  ggplot2::labs(
+    x = "BMI (kg/m²)", y = "Predicted probability",
     title = "BMI and Predicted Probability of the Health Outcome"
   ) +
-  theme_minimal(
-    base_size = 12
-  )
+  ggplot2::theme_minimal(base_size = 12)
 
-print(spline_plot)
-
-ggsave(
-  filename = "output/figure_bmi_spline.png",
-  plot = spline_plot,
-  width = 7,
-  height = 5,
-  dpi = 300
-)
-
-
-cat(
-  "\nFigures successfully saved to output/.\n"
-)
+ggplot2::ggsave("output/figure_forest_plot.png", p_forest,
+                width = 7, height = 5, dpi = 300)
+ggplot2::ggsave("output/figure_bmi_spline.png", p_spline,
+                width = 7, height = 5, dpi = 300)
+message("Forest plot and spline plot saved.")
